@@ -56,17 +56,62 @@ function apiBase(): string {
   return import.meta.env.VITE_API_BASE_URL ?? ''
 }
 
-export async function apiGet<T>(path: string, token?: string | null): Promise<T> {
-  const headers: Record<string, string> = { Accept: 'application/json' }
+async function request<T>(
+  path: string,
+  init: RequestInit = {},
+  token?: string | null,
+): Promise<T> {
+  const headers = new Headers(init.headers)
+  headers.set('Accept', 'application/json')
+  if (init.body && !headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json')
+  }
   if (token) {
-    headers.Authorization = `Bearer ${token}`
+    headers.set('Authorization', `Bearer ${token}`)
   }
 
-  const response = await fetch(`${apiBase()}${path}`, { headers })
+  const response = await fetch(`${apiBase()}${path}`, { ...init, headers })
   if (!response.ok) {
     throw await toError(response)
   }
+  if (response.status === 204) {
+    return undefined as T
+  }
   return (await response.json()) as T
+}
+
+export async function apiGet<T>(path: string, token?: string | null): Promise<T> {
+  return request<T>(path, { method: 'GET' }, token)
+}
+
+export async function apiPost<T>(
+  path: string,
+  body: unknown,
+  token?: string | null,
+): Promise<T> {
+  return request<T>(
+    path,
+    {
+      method: 'POST',
+      body: JSON.stringify(body),
+    },
+    token,
+  )
+}
+
+export function register(
+  username: string,
+  password: string,
+): Promise<AuthResponse> {
+  return apiPost<AuthResponse>('/api/v1/auth/register', { username, password })
+}
+
+export function login(username: string, password: string): Promise<AuthResponse> {
+  return apiPost<AuthResponse>('/api/v1/auth/login', { username, password })
+}
+
+export function fetchMyAccount(token: string): Promise<AccountResponse> {
+  return apiGet<AccountResponse>('/api/v1/accounts/me', token)
 }
 
 async function toError(response: Response): Promise<ApiClientError> {
@@ -74,6 +119,13 @@ async function toError(response: Response): Promise<ApiClientError> {
     const body = (await response.json()) as ApiError
     return new ApiClientError(response.status, body)
   } catch {
+    if (response.status === 400) {
+      return new ApiClientError(response.status, {
+        code: 'VALIDATION_ERROR',
+        message:
+          'Request was rejected before it reached the API. Try a shorter username (not an email), or restart the backend after the latest config change.',
+      })
+    }
     return new ApiClientError(response.status, null)
   }
 }
