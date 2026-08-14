@@ -59,4 +59,4 @@ curl -s -o /dev/null -w "%{http_code}\n" http://localhost:8090/api/v1/accounts/m
 
 ## Status
 
-Auth and API protection are live: register/login, JWT Bearer on protected routes, and `GET /api/v1/accounts/me` for the dashboard. Transfers, idempotency, faucet, and rate limits are next.
+Transfers are live: ordered pessimistic locks, PostgreSQL-backed idempotency with Redis cache, cursor history, and a dashboard transfer form. Demo faucet and rate limiting are next.

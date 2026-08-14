@@ -15,6 +15,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -41,14 +42,19 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({
         HttpMessageNotReadableException.class,
         MissingRequestHeaderException.class,
-        IllegalArgumentException.class
+        IllegalArgumentException.class,
+        MethodArgumentTypeMismatchException.class
     })
     public ResponseEntity<ApiError> handleBadRequest(Exception ex) {
-        return body(
-                HttpStatus.BAD_REQUEST,
-                ErrorCode.VALIDATION_ERROR,
-                ex.getMessage() == null ? "Request is invalid." : ex.getMessage(),
-                List.of());
+        String message = "Request is invalid.";
+        if (ex instanceof MissingRequestHeaderException missing) {
+            message = "Missing required header: " + missing.getHeaderName();
+        } else if (ex instanceof MethodArgumentTypeMismatchException mismatch) {
+            message = "Invalid value for " + mismatch.getName() + ".";
+        } else if (ex.getMessage() != null && !ex.getMessage().isBlank()) {
+            message = ex.getMessage();
+        }
+        return body(HttpStatus.BAD_REQUEST, ErrorCode.VALIDATION_ERROR, message, List.of());
     }
 
     @ExceptionHandler(AuthenticationException.class)
