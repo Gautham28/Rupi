@@ -1,0 +1,25 @@
+.DS_Store
+.env
+.env.*
+!.env.example
+
+# Java
+**/target/
+**/.mvn/wrapper/maven-wrapper.jar
+*.class
+*.jar
+*.war
+*.iml
+.idea/
+
+# Node
+**/node_modules/
+**/dist/
+**/*.local
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+!.vscode/extensions.json

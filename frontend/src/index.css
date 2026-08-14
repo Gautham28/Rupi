@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Source Sans 3", "Segoe UI", sans-serif;
+  --font-display: "Fraunces", Georgia, serif;
+  --color-ink: #16140f;
+  --color-paper: #f4efe4;
+  --color-mute: #6f6a60;
+  --color-line: #d9d2c4;
+  --color-copper: #b85c38;
+  --color-copper-dark: #8c3f24;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
