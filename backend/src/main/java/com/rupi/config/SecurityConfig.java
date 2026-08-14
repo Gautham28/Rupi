@@ -39,7 +39,9 @@ public class SecurityConfig {
                 .formLogin(form -> form.disable())
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(authenticationEntryPoint)
                         .accessDeniedHandler(accessDeniedHandler))
-                .authorizeHttpRequests(auth -> auth.requestMatchers(
+                .authorizeHttpRequests(auth -> auth
+                        // Public
+                        .requestMatchers(
                                 "/api/v1/status",
                                 "/api/v1/auth/**",
                                 "/actuator/health",
@@ -48,6 +50,12 @@ public class SecurityConfig {
                         .permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**")
                         .permitAll()
+                        // Explicitly protected (Bearer JWT required)
+                        .requestMatchers(
+                                "/api/v1/accounts/**",
+                                "/api/v1/transactions/**",
+                                "/api/v1/demo/**")
+                        .authenticated()
                         .anyRequest()
                         .authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

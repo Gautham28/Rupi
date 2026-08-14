@@ -90,9 +90,13 @@ export function DashboardPage() {
           <div>
             <dt className="text-xs tracking-wide text-mute uppercase">Account ID</dt>
             <dd className="mt-2 break-all font-mono text-sm">{account.accountId}</dd>
-            <p className="mt-1 text-sm text-mute">
-              Share this ID when transfers land in the next slice.
-            </p>
+            <button
+              type="button"
+              className="mt-2 text-sm text-ink underline"
+              onClick={() => navigator.clipboard.writeText(account.accountId)}
+            >
+              Copy account ID
+            </button>
           </div>
         </dl>
       ) : null}

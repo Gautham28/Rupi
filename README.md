@@ -44,6 +44,13 @@ Open http://localhost:5173 — the home page should show API `ok` and demo fauce
 
 Register a user (password ≥ 10 chars), land on the dashboard with **1,000.00** sandbox credits, log out, then sign back in.
 
+Protected routes (`/api/v1/accounts/**`, `/api/v1/transactions/**`, `/api/v1/demo/**`) require `Authorization: Bearer <jwt>`. Without a token:
+
+```bash
+curl -s -o /dev/null -w "%{http_code}\n" http://localhost:8090/api/v1/accounts/me
+# 401
+```
+
 ## Docs
 
 - [API contract](docs/api-contract.md)
@@ -52,4 +59,4 @@ Register a user (password ≥ 10 chars), land on the dashboard with **1,000.00**
 
 ## Status
 
-Auth is live: register, login, JWT-protected `GET /api/v1/accounts/me`, and a dashboard shell. Transfers, idempotency, faucet, and rate limits are next.
+Auth and API protection are live: register/login, JWT Bearer on protected routes, and `GET /api/v1/accounts/me` for the dashboard. Transfers, idempotency, faucet, and rate limits are next.
