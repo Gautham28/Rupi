@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ApiClientError, apiGet, type StatusResponse } from '../api/client'
+import { useAuth } from '../auth/AuthContext'
 
 export function HomePage() {
+  const { token } = useAuth()
   const [status, setStatus] = useState<StatusResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -43,18 +45,29 @@ export function HomePage() {
       </p>
 
       <div className="mt-8 flex gap-3">
-        <Link
-          to="/register"
-          className="rounded-sm bg-copper px-4 py-2 text-sm font-medium text-paper"
-        >
-          Create account
-        </Link>
-        <Link
-          to="/login"
-          className="rounded-sm border border-line px-4 py-2 text-sm font-medium"
-        >
-          Sign in
-        </Link>
+        {token ? (
+          <Link
+            to="/dashboard"
+            className="rounded-sm bg-copper px-4 py-2 text-sm font-medium text-paper"
+          >
+            Open dashboard
+          </Link>
+        ) : (
+          <>
+            <Link
+              to="/register"
+              className="rounded-sm bg-copper px-4 py-2 text-sm font-medium text-paper"
+            >
+              Create account
+            </Link>
+            <Link
+              to="/login"
+              className="rounded-sm border border-line px-4 py-2 text-sm font-medium"
+            >
+              Sign in
+            </Link>
+          </>
+        )}
       </div>
 
       <dl className="mt-12 grid gap-4 border-t border-line pt-8 sm:grid-cols-3">

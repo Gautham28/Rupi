@@ -40,7 +40,9 @@ curl -s -o /dev/null -w "%{http_code}\n" http://localhost:8090/api/v1/accounts/m
 # 401
 ```
 
-Open http://localhost:5173 — the home page should show API `ok` and demo faucet `on`. Sign-in and register are still placeholders.
+Open http://localhost:5173 — the home page should show API `ok` and demo faucet `on`.
+
+Register a user (password ≥ 10 chars), land on the dashboard with **1,000.00** sandbox credits, log out, then sign back in.
 
 ## Docs
 
@@ -50,4 +52,4 @@ Open http://localhost:5173 — the home page should show API `ok` and demo fauce
 
 ## Status
 
-Phase 0–1 scaffold: contracts, compile-ready apps, Docker, and the first Flyway schema. Auth, ledger, and dashboard behavior are next.
+Auth is live: register, login, JWT-protected `GET /api/v1/accounts/me`, and a dashboard shell. Transfers, idempotency, faucet, and rate limits are next.

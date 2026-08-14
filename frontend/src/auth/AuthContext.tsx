@@ -5,11 +5,17 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import { getStoredToken, setStoredToken } from '../api/client'
+import {
+  getStoredToken,
+  setStoredToken,
+  type AuthResponse,
+} from '../api/client'
 
 type AuthState = {
   token: string | null
   setToken: (token: string | null) => void
+  acceptAuth: (auth: AuthResponse) => void
+  logout: () => void
 }
 
 const AuthContext = createContext<AuthState | undefined>(undefined)
@@ -23,6 +29,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setToken: (next: string | null) => {
         setStoredToken(next)
         setTokenState(next)
+      },
+      acceptAuth: (auth: AuthResponse) => {
+        setStoredToken(auth.token)
+        setTokenState(auth.token)
+      },
+      logout: () => {
+        setStoredToken(null)
+        setTokenState(null)
       },
     }),
     [token],
