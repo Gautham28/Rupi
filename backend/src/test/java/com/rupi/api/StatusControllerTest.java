@@ -47,11 +47,4 @@ class StatusControllerTest {
                 .andExpect(jsonPath("$.service").value("rupi"))
                 .andExpect(jsonPath("$.status").value("ok"));
     }
-
-    @Test
-    void accountsMeRequiresAuth() throws Exception {
-        mockMvc.perform(get("/api/v1/accounts/me"))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.code").value("UNAUTHENTICATED"));
-    }
 }

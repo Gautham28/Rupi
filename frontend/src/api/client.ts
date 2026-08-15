@@ -27,6 +27,23 @@ export type AccountResponse = {
   demoMode: boolean
 }
 
+export type TransactionResponse = {
+  id: string
+  fromAccountId: string
+  toAccountId: string
+  counterpartyAccountId: string
+  amount: string
+  direction: 'INCOMING' | 'OUTGOING' | string
+  status: string
+  createdAt: string
+}
+
+export type TransactionPageResponse = {
+  items: TransactionResponse[]
+  nextCursor: string | null
+  hasMore: boolean
+}
+
 export class ApiClientError extends Error {
   readonly status: number
   readonly body: ApiError | null
@@ -88,12 +105,20 @@ export async function apiPost<T>(
   path: string,
   body: unknown,
   token?: string | null,
+  extraHeaders?: Record<string, string>,
 ): Promise<T> {
+  const headers = new Headers()
+  if (extraHeaders) {
+    for (const [key, value] of Object.entries(extraHeaders)) {
+      headers.set(key, value)
+    }
+  }
   return request<T>(
     path,
     {
       method: 'POST',
       body: JSON.stringify(body),
+      headers,
     },
     token,
   )
@@ -112,6 +137,28 @@ export function login(username: string, password: string): Promise<AuthResponse>
 
 export function fetchMyAccount(token: string): Promise<AccountResponse> {
   return apiGet<AccountResponse>('/api/v1/accounts/me', token)
+}
+
+export function createTransfer(
+  token: string,
+  toAccountId: string,
+  amount: string,
+  idempotencyKey: string,
+): Promise<TransactionResponse> {
+  return apiPost<TransactionResponse>(
+    '/api/v1/transactions',
+    { toAccountId, amount },
+    token,
+    { 'Idempotency-Key': idempotencyKey },
+  )
+}
+
+export function fetchTransactions(
+  token: string,
+  cursor?: string | null,
+): Promise<TransactionPageResponse> {
+  const query = cursor ? `?limit=20&cursor=${encodeURIComponent(cursor)}` : '?limit=20'
+  return apiGet<TransactionPageResponse>(`/api/v1/transactions${query}`, token)
 }
 
 async function toError(response: Response): Promise<ApiClientError> {
