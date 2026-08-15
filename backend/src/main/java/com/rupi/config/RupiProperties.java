@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "rupi")
-public record RupiProperties(Jwt jwt, Cors cors, Demo demo) {
+public record RupiProperties(Jwt jwt, Cors cors, Demo demo, RateLimit rateLimit) {
 
     public record Jwt(String secret, long expirationMs) {}
 
@@ -16,4 +16,6 @@ public record RupiProperties(Jwt jwt, Cors cors, Demo demo) {
             BigDecimal faucetAmount,
             int faucetCooldownHours,
             BigDecimal maxBalance) {}
+
+    public record RateLimit(int capacity, int refillPerSecond) {}
 }

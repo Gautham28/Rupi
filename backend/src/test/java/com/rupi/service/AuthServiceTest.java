@@ -58,7 +58,8 @@ class AuthServiceTest {
                         new BigDecimal("1000.00"),
                         new BigDecimal("500.00"),
                         24,
-                        new BigDecimal("5000.00")));
+                        new BigDecimal("5000.00")),
+                new RupiProperties.RateLimit(10, 10));
         authService = new AuthService(
                 appUserRepository, accountRepository, passwordEncoder, jwtService, properties);
     }

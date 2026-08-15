@@ -3,6 +3,7 @@ package com.rupi.config;
 import com.rupi.security.JsonAccessDeniedHandler;
 import com.rupi.security.JsonAuthenticationEntryPoint;
 import com.rupi.security.JwtAuthenticationFilter;
+import com.rupi.security.RateLimitFilter;
 import java.util.Arrays;
 import java.util.List;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -28,6 +29,7 @@ public class SecurityConfig {
     SecurityFilterChain securityFilterChain(
             HttpSecurity http,
             JwtAuthenticationFilter jwtAuthenticationFilter,
+            RateLimitFilter rateLimitFilter,
             JsonAuthenticationEntryPoint authenticationEntryPoint,
             JsonAccessDeniedHandler accessDeniedHandler)
             throws Exception {
@@ -58,7 +60,8 @@ public class SecurityConfig {
                         .authenticated()
                         .anyRequest()
                         .authenticated())
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(rateLimitFilter, JwtAuthenticationFilter.class);
         return http.build();
     }
 
