@@ -65,6 +65,16 @@ cd backend && ./mvnw test
 cd frontend && npm ci && npm run build
 ```
 
+## Concurrency proof (k6)
+
+This load test registers two users, sends overlapping 1.00 transfers both ways (~8 req/s each, under the 10 req/s rate limit), then storms the same `Idempotency-Key`. It **passes** if there are no 5xx responses and both balances still sum to **2000.00**.
+
+```bash
+brew install k6
+# Docker Compose + backend must already be running
+k6 run k6/concurrent-transfers.js
+```
+
 ## Docs
 
 - [API contract](docs/api-contract.md)
@@ -79,4 +89,4 @@ cd frontend && npm ci && npm run build
 
 ## Status
 
-Auth, transfers, history, demo faucet, and per-user rate limiting are live. CI, k6 concurrency proof, and free deploy are next.
+Auth, transfers, history, demo faucet, per-user rate limiting, and GitHub Actions CI are live. k6 concurrency proof is next; then free deploy.
