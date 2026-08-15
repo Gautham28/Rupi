@@ -51,6 +51,20 @@ curl -s -o /dev/null -w "%{http_code}\n" http://localhost:8090/api/v1/accounts/m
 # 401
 ```
 
+## CI
+
+Every push and pull request runs GitHub Actions:
+
+- Backend: Java 21, `./mvnw test`
+- Frontend: Node 22, `npm ci` then `npm run build` (TypeScript check + Vite bundle)
+
+Open the **Actions** tab on GitHub to see the latest run. Local equivalent:
+
+```bash
+cd backend && ./mvnw test
+cd frontend && npm ci && npm run build
+```
+
 ## Docs
 
 - [API contract](docs/api-contract.md)
