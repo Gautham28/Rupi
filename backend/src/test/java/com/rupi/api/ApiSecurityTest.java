@@ -14,7 +14,9 @@ import com.rupi.security.JsonAccessDeniedHandler;
 import com.rupi.security.JsonAuthenticationEntryPoint;
 import com.rupi.security.JwtAuthenticationFilter;
 import com.rupi.security.JwtService;
+import com.rupi.security.RateLimitFilter;
 import com.rupi.service.AuthService;
+import com.rupi.service.RateLimiterService;
 import java.math.BigDecimal;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -36,6 +38,7 @@ import org.springframework.test.web.servlet.MockMvc;
     JwtService.class,
     JsonAuthenticationEntryPoint.class,
     JsonAccessDeniedHandler.class,
+    RateLimitFilter.class,
     ApiSecurityTest.AuthServiceTestConfig.class
 })
 @TestPropertySource(
@@ -47,7 +50,9 @@ import org.springframework.test.web.servlet.MockMvc;
             "rupi.demo.signup-credits=1000.00",
             "rupi.demo.faucet-amount=500.00",
             "rupi.demo.faucet-cooldown-hours=24",
-            "rupi.demo.max-balance=5000.00"
+            "rupi.demo.max-balance=5000.00",
+            "rupi.rate-limit.capacity=10",
+            "rupi.rate-limit.refill-per-second=10"
         })
 class ApiSecurityTest {
 
@@ -122,6 +127,14 @@ class ApiSecurityTest {
         @Bean
         AuthService authService() {
             return Mockito.mock(AuthService.class);
+        }
+
+        @Bean
+        RateLimiterService rateLimiterService() {
+            RateLimiterService mock = Mockito.mock(RateLimiterService.class);
+            when(mock.tryConsume(any(UUID.class)))
+                    .thenReturn(RateLimiterService.RateLimitResult.allowed(10));
+            return mock;
         }
     }
 }

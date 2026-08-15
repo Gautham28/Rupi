@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
   ApiClientError,
+  claimFaucet,
   createTransfer,
   fetchMyAccount,
   fetchTransactions,
@@ -20,11 +21,15 @@ export function DashboardPage() {
   const [error, setError] = useState<string | null>(null)
   const [transferError, setTransferError] = useState<string | null>(null)
   const [transferSuccess, setTransferSuccess] = useState<string | null>(null)
+  const [faucetError, setFaucetError] = useState<string | null>(null)
+  const [faucetSuccess, setFaucetSuccess] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [toAccountId, setToAccountId] = useState('')
   const [amount, setAmount] = useState('')
   const [idempotencyKey, setIdempotencyKey] = useState(() => crypto.randomUUID())
+  const [faucetKey, setFaucetKey] = useState(() => crypto.randomUUID())
   const [submitting, setSubmitting] = useState(false)
+  const [faucetBusy, setFaucetBusy] = useState(false)
 
   const refresh = useCallback(async () => {
     if (!token) {
@@ -94,11 +99,7 @@ export function DashboardPage() {
         navigate('/login', { replace: true })
         return
       }
-      setTransferError(
-        err instanceof ApiClientError
-          ? err.message
-          : 'Transfer failed. Try again.',
-      )
+      setTransferError(formatApiError(err, 'Transfer failed. Try again.'))
     } finally {
       setSubmitting(false)
     }
@@ -114,12 +115,44 @@ export function DashboardPage() {
       setNextCursor(history.nextCursor)
       setHasMore(history.hasMore)
     } catch (err) {
-      setError(
-        err instanceof ApiClientError
-          ? err.message
-          : 'Could not load more transfers.',
-      )
+      setError(formatApiError(err, 'Could not load more transfers.'))
     }
+  }
+
+  async function onFaucet() {
+    if (!token) {
+      return
+    }
+    setFaucetError(null)
+    setFaucetSuccess(null)
+    setFaucetBusy(true)
+    try {
+      const result = await claimFaucet(token, faucetKey)
+      setFaucetSuccess(
+        `Added ${result.granted} demo credits. Balance is now ${result.balance}.`,
+      )
+      setFaucetKey(crypto.randomUUID())
+      await refresh()
+    } catch (err) {
+      if (err instanceof ApiClientError && err.status === 401) {
+        logout()
+        navigate('/login', { replace: true })
+        return
+      }
+      setFaucetError(formatApiError(err, 'Faucet claim failed.'))
+    } finally {
+      setFaucetBusy(false)
+    }
+  }
+
+  function formatApiError(err: unknown, fallback: string): string {
+    if (!(err instanceof ApiClientError)) {
+      return fallback
+    }
+    if (err.status === 429 || err.body?.code === 'RATE_LIMITED') {
+      return err.message || 'Too many requests. Wait a moment and try again.'
+    }
+    return err.message || fallback
   }
 
   return (
@@ -151,7 +184,25 @@ export function DashboardPage() {
                 Sandbox balance
               </dt>
               <dd className="font-display mt-1 text-3xl">{account.balance}</dd>
-              <p className="mt-1 text-sm text-mute">Demo credits only</p>
+              <p className="mt-1 text-sm text-mute">Demo credits only · max 5,000.00</p>
+              {account.demoMode ? (
+                <div className="mt-4">
+                  <button
+                    type="button"
+                    disabled={faucetBusy}
+                    onClick={() => void onFaucet()}
+                    className="border border-line px-3 py-2 text-sm disabled:opacity-60"
+                  >
+                    {faucetBusy ? 'Claiming…' : 'Add 500 demo credits'}
+                  </button>
+                  {faucetError ? (
+                    <p className="mt-2 text-sm text-copper-dark">{faucetError}</p>
+                  ) : null}
+                  {faucetSuccess ? (
+                    <p className="mt-2 text-sm text-ink">{faucetSuccess}</p>
+                  ) : null}
+                </div>
+              ) : null}
             </div>
             <div>
               <dt className="text-xs tracking-wide text-mute uppercase">Account ID</dt>

@@ -50,3 +50,6 @@ rupi:
     faucet-amount: 500.00
     faucet-cooldown-hours: 24
     max-balance: 5000.00
+  rate-limit:
+    capacity: ${RATE_LIMIT_CAPACITY:10}
+    refill-per-second: ${RATE_LIMIT_REFILL_PER_SECOND:10}

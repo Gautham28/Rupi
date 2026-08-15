@@ -57,6 +57,12 @@ curl -s -o /dev/null -w "%{http_code}\n" http://localhost:8090/api/v1/accounts/m
 - [ADRs](docs/adr/)
 - Original PRD: [proj-description.md](proj-description.md)
 
+## Demo faucet and rate limits
+
+- `POST /api/v1/demo/faucet` with Bearer JWT + `Idempotency-Key` grants **500.00** sandbox credits.
+- One grant per account every **24 hours**; balance cannot exceed **5,000.00**.
+- Authenticated API traffic is limited to about **10 requests/second per user** (Redis token bucket). Over limit returns `429 RATE_LIMITED` with `Retry-After`.
+
 ## Status
 
-Transfers are live: ordered pessimistic locks, PostgreSQL-backed idempotency with Redis cache, cursor history, and a dashboard transfer form. Demo faucet and rate limiting are next.
+Auth, transfers, history, demo faucet, and per-user rate limiting are live. CI, k6 concurrency proof, and free deploy are next.

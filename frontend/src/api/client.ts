@@ -44,6 +44,12 @@ export type TransactionPageResponse = {
   hasMore: boolean
 }
 
+export type FaucetResponse = {
+  accountId: string
+  granted: string
+  balance: string
+}
+
 export class ApiClientError extends Error {
   readonly status: number
   readonly body: ApiError | null
@@ -159,6 +165,18 @@ export function fetchTransactions(
 ): Promise<TransactionPageResponse> {
   const query = cursor ? `?limit=20&cursor=${encodeURIComponent(cursor)}` : '?limit=20'
   return apiGet<TransactionPageResponse>(`/api/v1/transactions${query}`, token)
+}
+
+export function claimFaucet(
+  token: string,
+  idempotencyKey: string,
+): Promise<FaucetResponse> {
+  return apiPost<FaucetResponse>(
+    '/api/v1/demo/faucet',
+    {},
+    token,
+    { 'Idempotency-Key': idempotencyKey },
+  )
 }
 
 async function toError(response: Response): Promise<ApiClientError> {

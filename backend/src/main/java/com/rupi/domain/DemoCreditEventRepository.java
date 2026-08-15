@@ -1,0 +1,21 @@
+package com.rupi.domain;
+
+import java.time.Instant;
+import java.util.Optional;
+import java.util.UUID;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+public interface DemoCreditEventRepository extends JpaRepository<DemoCreditEvent, UUID> {
+
+    Optional<DemoCreditEvent> findByAccountIdAndIdempotencyKey(UUID accountId, UUID idempotencyKey);
+
+    @Query(
+            """
+            select count(e) > 0 from DemoCreditEvent e
+            where e.accountId = :accountId
+              and e.createdAt >= :since
+            """)
+    boolean existsRecentGrant(@Param("accountId") UUID accountId, @Param("since") Instant since);
+}
